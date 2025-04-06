@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "frontend/lexer.h"
+#include "frontend/parser.h"
 #include "common/vector.h"
 
 int main(int argc, char** argv) {
@@ -12,11 +13,14 @@ int main(int argc, char** argv) {
 
     lexer_t *lexer = lexer_read(argv[1]);
     vector_t *tokens = lexer_lex(lexer);
-    size_t token_count = tokens->buf_size;
+    parser_t *parser = parser_new(tokens);
+    prog_t *prog = parser_parse(parser);
+    size_t stmt_count = prog->body->buf_size;
 
-    for (size_t i = 0; i < token_count; i++) {
-        token_t *token = (token_t*) vector_at(tokens, i);
-        printf("%s\n", token->lexeme);
+    for (size_t i = 0; i < stmt_count; i++) {
+        stmt_t *stmt = (stmt_t*) vector_at(prog->body, i);
+        printf("k: %d, code: %s\n", 
+            stmt->kind, stmt->body.exit_stmt.exit_token.lexeme);
     }
 
     return 0;

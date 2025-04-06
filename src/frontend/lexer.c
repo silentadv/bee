@@ -113,20 +113,23 @@ vector_t* lexer_lex(lexer_t *lexer) {
         exit(EXIT_FAILURE);
     }
 
+    token_t eof = (token_t){ .kind = TOK_EOF, .lexeme = "EOF" };
+    vector_push(tokens, &eof);
+
     return tokens;
 }
 
 opt_char_t lexer_peek(lexer_t *lexer) {
-    size_t lexeme_size = strlen(lexer->source);
-    if (lexer->cursor >= lexeme_size) return opt_char_none();
+    size_t buf_size = strlen(lexer->source);
+    if (lexer->cursor >= buf_size) return opt_char_none();
 
     char c = lexer->source[lexer->cursor];
     return opt_char_some(c);
 }
 
 opt_char_t lexer_consume(lexer_t *lexer) {
-    size_t lexeme_size = strlen(lexer->source);
-    if (lexer->cursor >= lexeme_size) return opt_char_none();
+    size_t buf_size = strlen(lexer->source);
+    if (lexer->cursor >= buf_size) return opt_char_none();
 
     char c = lexer->source[lexer->cursor++];
     return opt_char_some(c);
