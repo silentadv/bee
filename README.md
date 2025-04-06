@@ -6,6 +6,6 @@ Bee is a compiled language.
 
 ```ebnf
 prog       ::= stmt*
-stmt       ::= exit_stmt | var_stmt
+stmt       ::= exit_stmt
 exit_stmt  ::= "exit" int_lit ";"
 ```
