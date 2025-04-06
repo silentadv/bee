@@ -13,11 +13,11 @@ $(EXEC): $(OBJS)
 $(OUTDIR)/main.o: src/main.c | $(OUTDIR)
 	$(CC) $(CFLAGS) src/main.c -o $(OUTDIR)/main.o
 
-$(OUTDIR)/lexer.o: src/lexer.c | $(OUTDIR)
-	$(CC) $(CFLAGS) src/lexer.c -o $(OUTDIR)/lexer.o
+$(OUTDIR)/lexer.o: src/frontend/lexer.c | $(OUTDIR)
+	$(CC) $(CFLAGS) src/frontend/lexer.c -o $(OUTDIR)/lexer.o
 
-$(OUTDIR)/vector.o: src/vector.o | $(OUTDIR)
-	$(CC) $(CFLAGS) src/vector.c -o $(OUTDIR)/vector.o
+$(OUTDIR)/vector.o: src/common/vector.c | $(OUTDIR)
+	$(CC) $(CFLAGS) src/common/vector.c -o $(OUTDIR)/vector.o
 	
 $(OUTDIR):
 	mkdir -p $(OUTDIR)

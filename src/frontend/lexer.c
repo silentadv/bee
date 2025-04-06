@@ -2,8 +2,35 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdio.h>
+
 #include "lexer.h"
-#include "vector.h"
+#include "../common/vector.h"
+
+lexer_t* lexer_read(const char *filename) {
+    FILE* file = fopen(filename, "r");
+    if (!file) {
+        perror("Invalid file has provided.");
+        exit(EXIT_FAILURE);
+    }
+
+    fseek(file, 0, SEEK_END);
+    size_t size = ftell(file);
+    rewind(file);
+
+    char *buffer = malloc(sizeof(char) * (size + 1));
+    if (!buffer) {
+        perror("Error ocurred during reading file.");
+        fclose(file);
+        exit(EXIT_FAILURE);
+    }
+
+    fread(buffer, sizeof(char), size, file);
+    buffer[size] = '\0';
+    
+    fclose(file);
+
+    return lexer_new(buffer);
+}
 
 lexer_t* lexer_new(const char *source) {
     lexer_t *instance = malloc(sizeof(lexer_t));

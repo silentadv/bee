@@ -2,8 +2,9 @@
 #define LEXER_H
 
 #include <stddef.h>
-#include "optionals.h"
-#include "vector.h"
+
+#include "../common/optionals.h"
+#include "../common/vector.h"
 
 typedef enum {
     TOK_EOF = 0,
@@ -23,6 +24,7 @@ typedef struct {
     char *source;
 } lexer_t;
 
+lexer_t* lexer_read(const char *filename);
 lexer_t* lexer_new(const char *source);
 vector_t* lexer_lex(lexer_t *lexer);
 
