@@ -4,7 +4,7 @@ Bee is a compiled language.
 
 ## Grammar
 
-$$
+$
 \begin{align}
 \text{prog} \to [stmt]^* \\
 \text{stmt} \to
@@ -15,4 +15,4 @@ $$
 \\
 \text{exit\_stmt} \to \space \text{exit} \space [int\_lit] \space;
 \end{align}
-$$
+$
