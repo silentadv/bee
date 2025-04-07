@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <assert.h>
 
 #include "frontend/lexer.h"
 #include "frontend/parser.h"
 #include "backend/generator.h"
 #include "common/vector.h"
+
 
 int main(int argc, char** argv) {
     if (argc <= 1) {
