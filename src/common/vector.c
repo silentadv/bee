@@ -44,9 +44,5 @@ void* vector_at(vector_t *vector, size_t idx) {
 
 void vector_destroy(vector_t *vector) {
     free(vector->buf);
-    
-    vector->buf = NULL;
-    vector->capacity = 0;
-    vector->buf_size = 0;
-    vector->element_size = 0;
+    free(vector);
 }

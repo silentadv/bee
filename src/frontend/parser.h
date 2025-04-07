@@ -30,7 +30,10 @@ typedef struct {
 } parser_t;
 
 parser_t* parser_new(vector_t *tokens);
+void parser_destroy(parser_t *parser);
+
 prog_t* parser_parse(parser_t *parser);
+stmt_t parser_parse_exit_stmt(parser_t *parser);
 
 token_t* parser_peek(parser_t *parser);
 token_t* parser_consume(parser_t *parser);

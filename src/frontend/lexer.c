@@ -43,6 +43,11 @@ lexer_t* lexer_new(const char *source) {
     return instance;
 }
 
+void lexer_destroy(lexer_t *lexer) {
+    free(lexer->source);
+    free(lexer);
+}
+
 vector_t* lexer_lex(lexer_t *lexer) {    
     const size_t initial_capacity = 25;
 

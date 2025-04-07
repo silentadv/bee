@@ -26,6 +26,7 @@ typedef struct {
 
 lexer_t* lexer_read(const char *filename);
 lexer_t* lexer_new(const char *source);
+void lexer_destroy(lexer_t *lexer);
 vector_t* lexer_lex(lexer_t *lexer);
 
 opt_char_t lexer_peek(lexer_t *lexer);
