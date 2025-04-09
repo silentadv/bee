@@ -5,19 +5,7 @@
 
 #include "../common/optionals.h"
 #include "../common/vector.h"
-
-typedef enum {
-    TOK_EOF = 0,
-    TOK_EXIT,
-    TOK_IDENT,
-    TOK_NUM,
-    TOK_SEMICOL,
-} token_kind_t;
-
-typedef struct {
-    token_kind_t kind;
-    char *lexeme;
-} token_t;
+#include "../common/token.h"
 
 typedef struct {
     size_t col, row, cursor;

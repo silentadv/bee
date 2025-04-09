@@ -1,4 +1,3 @@
-#include "../frontend/lexer.h"
 #include "../frontend/parser.h"
 #include "generator.h"
 #include <stdio.h>
@@ -58,7 +57,7 @@ void generator_gen_exit_stmt(generator_t *generator) {
 
     FILE* output = generator->output;
     fprintf(output, "   mov rax, 60\n");
-    fprintf(output, "   mov rdi, %s\n", exit_stmt.exit_token.lexeme);
+    fprintf(output, "   mov rdi, %s\n", exit_stmt.token.lexeme);
     fprintf(output, "   syscall\n");
 }
 

@@ -1,2 +1,2 @@
-exit 1;
-exit 10;
+let x = 10;
+exit x;
