@@ -27,5 +27,5 @@ exit y;
 - [ ] Implement support to more literal types;
 - [x] Implement code generation for expression and var declaration statements;
 - [x] Implement type checker and symbol table;
-- [] Create a logger for better error handling;
+- [ ] Create a logger for better error handling;
 
