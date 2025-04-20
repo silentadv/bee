@@ -2,6 +2,7 @@
 #define PARSER_H
 
 #include <stddef.h>
+#include <stdbool.h>
 #include "../common/token.h"
 #include "../common/vector.h"
 #include "../common/stmt.h"

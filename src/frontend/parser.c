@@ -3,7 +3,6 @@
 
 #include "../common/token.h"
 #include "../common/vector.h"
-#include "../frontend/lexer.h"
 #include "parser.h"
 
 parser_t *parser_new(vector_t *tokens) {
@@ -65,6 +64,7 @@ var_decl_stmt_t parser_parse_var_decl_stmt(parser_t *parser) {
       parser_parse_ident_expr(parser); // parsing variable identifier
 
   token_t *curr = parser_peek(parser);
+
   if (curr && curr->kind == TOK_COLON) {
     // TODO: type anotation parsing
   }

@@ -1,2 +1,3 @@
 let x = 10;
-exit x;
+let y = x;
+exit y;

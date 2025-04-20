@@ -3,7 +3,10 @@
 
 #include "frontend/lexer.h"
 #include "frontend/parser.h"
+#include "frontend/checker.h"
+
 #include "backend/generator.h"
+
 #include "common/vector.h"
 #include "common/token.h"
 
@@ -22,7 +25,6 @@ int main(int argc, char** argv) {
         printf("token -> k: %d, lexeme: %s\n", tok->kind, tok->lexeme); 
     }
 
-    
     parser_t *parser = parser_new(tokens);
     prog_t *prog = parser_parse(parser);
     vector_t *body = prog->body;
@@ -33,11 +35,12 @@ int main(int argc, char** argv) {
        printf("stmt -> k: %d\n", stmt->kind);
     }
 
-    /*
-    generator_t *generator = generator_new(prog);
+    checker_t *checker = checker_new(prog);
+    hashmap_t *symbols = checker_check(checker);
+
+    generator_t *generator = generator_new(prog, symbols, checker->stack_size);
     generator_gen(generator);
     generator_destroy(generator); 
-    */
 
     return 0;
 }

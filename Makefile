@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -c
 OUTDIR = ./build
 
-OBJS = $(OUTDIR)/main.o $(OUTDIR)/lexer.o $(OUTDIR)/parser.o $(OUTDIR)/generator.o $(OUTDIR)/vector.o $(OUTDIR)/hashmap.o
+OBJS = $(OUTDIR)/main.o $(OUTDIR)/lexer.o $(OUTDIR)/parser.o $(OUTDIR)/checker.o $(OUTDIR)/generator.o $(OUTDIR)/vector.o $(OUTDIR)/hashmap.o
 EXEC = $(OUTDIR)/bee
 
 all: $(EXEC)
@@ -18,6 +18,9 @@ $(OUTDIR)/lexer.o: src/frontend/lexer.c | $(OUTDIR)
 
 $(OUTDIR)/parser.o: src/frontend/parser.c | $(OUTDIR)
 	$(CC) $(CFLAGS) src/frontend/parser.c -o $(OUTDIR)/parser.o
+
+$(OUTDIR)/checker.o: src/frontend/checker.c | $(OUTDIR)
+	$(CC) $(CFLAGS) src/frontend/checker.c -o $(OUTDIR)/checker.o
 
 $(OUTDIR)/generator.o: src/backend/generator.c | $(OUTDIR)
 	$(CC) $(CFLAGS) src/backend/generator.c -o $(OUTDIR)/generator.o
