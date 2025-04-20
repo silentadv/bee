@@ -2,6 +2,7 @@
 #define STMT_H
 
 #include "expr.h"
+#include "optionals.h"
 #include "token.h"
 #include <stddef.h>
 
@@ -15,11 +16,10 @@ typedef struct {
 } exit_stmt_t;
 
 typedef struct {
-  bool has_type_anotation;
   ident_expr_t identifier;
   expr_t value;
   token_t var_kw;
-  token_t type_kw;
+  opt_token_t type_kw;
 } var_decl_stmt_t;
 
 typedef struct {

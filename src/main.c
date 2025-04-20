@@ -38,9 +38,12 @@ int main(int argc, char** argv) {
     checker_t *checker = checker_new(prog);
     hashmap_t *symbols = checker_check(checker);
 
-    generator_t *generator = generator_new(prog, symbols, checker->stack_size);
+    /*
+    generator_t *generator = generator_new(prog, symbols);
     generator_gen(generator);
     generator_destroy(generator); 
+
+    */ 
 
     return 0;
 }

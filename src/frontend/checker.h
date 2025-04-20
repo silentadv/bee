@@ -7,6 +7,7 @@
 
 typedef enum {
     TYPE_INT,
+    TYPE_STR
 } type_t;
 
 typedef struct {
@@ -29,6 +30,8 @@ void checker_check_stmt(checker_t *checker);
 type_t checker_check_expr(checker_t *checker, expr_t *expr);
 type_t checker_check_ident_expr(checker_t *checker, expr_t *expr);
 type_t checker_check_lit_expr(checker_t *checker, expr_t *expr);
+
+void checker_expect(type_t expects, type_t received);
 
 stmt_t* checker_peek(checker_t *checker);
 stmt_t* checker_consume(checker_t *checker);

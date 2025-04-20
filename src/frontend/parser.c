@@ -64,16 +64,19 @@ var_decl_stmt_t parser_parse_var_decl_stmt(parser_t *parser) {
       parser_parse_ident_expr(parser); // parsing variable identifier
 
   token_t *curr = parser_peek(parser);
+  opt_token_t type_kw = opt_token_none();
 
   if (curr && curr->kind == TOK_COLON) {
-    // TODO: type anotation parsing
+    parser_consume(parser); // consuming colon -> :
+    token_t *type_tok = parser_parse_type_tok(parser);
+    type_kw = opt_token_some(*type_tok);
   }
 
   token_t *assign_op = parser_expect(parser, TOK_ASSIGN);
   expr_t value = parser_parse_expr(parser); // parsing variable value (expr);
   parser_expect(parser, TOK_SEMICOL);       // expects end of line
 
-  var_decl_stmt_t var_decl_stmt = {.has_type_anotation = false,
+  var_decl_stmt_t var_decl_stmt = {.type_kw = type_kw,
                                    .identifier = ident_expr,
                                    .value = value,
                                    .var_kw = *var_kw};
@@ -83,27 +86,19 @@ var_decl_stmt_t parser_parse_var_decl_stmt(parser_t *parser) {
 
 expr_t parser_parse_expr(parser_t *parser) {
   token_t *curr = parser_peek(parser);
-
-  if (curr->kind == TOK_NUM) {
-    lit_expr_t lit_expr = parser_parse_lit_expr(parser);
-    expr_t expr = {.kind = EXPR_LIT, .body = {.lit_expr = lit_expr}};
-    return expr;
-  }
-
   if (curr->kind == TOK_IDENT) {
     ident_expr_t ident_expr = parser_parse_ident_expr(parser);
     expr_t expr = {.kind = EXPR_IDENT, .body = {.ident_expr = ident_expr}};
     return expr;
   }
 
-  printf("parser -> Invalid token received during expr parsing: (%d, %s)",
-         curr->kind, curr->lexeme);
-  exit(EXIT_FAILURE);
+  lit_expr_t lit_expr = parser_parse_lit_expr(parser);
+  expr_t expr = {.kind = EXPR_LIT, .body = {.lit_expr = lit_expr}};
+  return expr;
 }
 
 lit_expr_t parser_parse_lit_expr(parser_t *parser) {
-  token_t *lit =
-      parser_expect(parser, TOK_NUM); // TODO: add suport to more literals
+  token_t *lit = parser_parse_lit_tok(parser);
   lit_expr_t lit_expr = {.literal = *lit};
   return lit_expr;
 }
@@ -112,6 +107,32 @@ ident_expr_t parser_parse_ident_expr(parser_t *parser) {
   token_t *ident = parser_expect(parser, TOK_IDENT);
   ident_expr_t ident_expr = {.identifier = *ident};
   return ident_expr;
+}
+
+token_t *parser_parse_lit_tok(parser_t *parser) {
+  token_t *tok = parser_consume(parser);
+  switch (tok->kind) {
+  case TOK_NUM:
+  case TOK_STR:
+    return tok;
+  default:
+    printf("parser -> Invalid lit token received during parsing: (%d, %s)",
+           tok->kind, tok->lexeme);
+    exit(EXIT_FAILURE);
+  }
+}
+
+token_t *parser_parse_type_tok(parser_t *parser) {
+  token_t *tok = parser_consume(parser);
+  switch (tok->kind) {
+  case TOK_KW_INT:
+  case TOK_KW_STR:
+    return tok;
+  default:
+    printf("parser -> Invalid type token received during parsing: (%d, %s)",
+           tok->kind, tok->lexeme);
+    exit(EXIT_FAILURE);
+  }
 }
 
 token_t *parser_peek(parser_t *parser) {

@@ -16,8 +16,10 @@ exit_stmt      ::= "exit" expr ";"
 ## Examples
 
 ```ts
-let x = 10;
+let x: int = 10;
 let y = x;
+let z = "hello world";
+let string: str = z;
 exit y;
 ```
 

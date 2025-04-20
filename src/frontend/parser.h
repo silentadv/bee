@@ -29,6 +29,9 @@ expr_t parser_parse_expr(parser_t *parser);
 lit_expr_t parser_parse_lit_expr(parser_t *parser);
 ident_expr_t parser_parse_ident_expr(parser_t *parser);
 
+token_t *parser_parse_lit_tok(parser_t *parser);
+token_t *parser_parse_type_tok(parser_t *parser);
+
 token_t *parser_peek(parser_t *parser);
 token_t *parser_consume(parser_t *parser);
 token_t *parser_expect(parser_t *parser, token_kind_t kind);

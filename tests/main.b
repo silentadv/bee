@@ -1,3 +1,3 @@
-let x = 10;
+let x: str = "1";
 let y = x;
-exit y;
+exit 10;

@@ -2,6 +2,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+static const type_t type_anottations[] = {
+    [TOK_KW_STR] = TYPE_STR,
+    [TOK_KW_INT] = TYPE_INT
+};
+
 checker_t *checker_new(prog_t *program) {
   checker_t *checker = malloc(sizeof(checker_t));
   size_t symbols_capacity = 50;
@@ -25,10 +30,14 @@ void checker_check_stmt(checker_t *checker) {
   switch (stmt->kind) {
   case STMT_VAR_DECL: {
     var_decl_stmt_t var_decl_stmt = stmt->body.var_decl_stmt;
-    type_t var_type = checker_check_expr(checker, &var_decl_stmt.value);
+    type_t received_type = checker_check_expr(checker, &var_decl_stmt.value);
+    
+    if (var_decl_stmt.type_kw.has_value)
+        checker_expect(type_anottations[var_decl_stmt.type_kw.value.kind], received_type);  
+
     symbol_t symbol = {.ident_expr = var_decl_stmt.identifier,
                        .value = var_decl_stmt.value,
-                       .type = var_type};
+                       .type = received_type};
 
     hashmap_insert(checker->symbols, var_decl_stmt.identifier.identifier.lexeme,
                    &symbol, sizeof(symbol));
@@ -36,7 +45,8 @@ void checker_check_stmt(checker_t *checker) {
   }
   case STMT_EXIT: {
     exit_stmt_t exit_stmt = stmt->body.exit_stmt;
-    checker_check_expr(checker, &exit_stmt.exit_code_expr);
+    type_t code_type = checker_check_expr(checker, &exit_stmt.exit_code_expr);
+    checker_expect(TYPE_INT, code_type);
     break;
   }
   default:
@@ -79,6 +89,8 @@ type_t checker_check_lit_expr(checker_t *checker, expr_t *expr) {
   switch (lit_expr.literal.kind) {
   case TOK_NUM:
     return TYPE_INT;
+  case TOK_STR:
+    return TYPE_STR;
   default:
     printf("checker -> Invalid literal found during checking -> k: %d \n",
            lit_expr.literal.kind);
@@ -106,4 +118,13 @@ stmt_t *checker_consume(checker_t *checker) {
   checker->cursor++;
 
   return stmt;
+}
+
+void checker_expect(type_t expects, type_t received){
+  if (expects == received)
+    return;
+
+  printf("checker -> Expects type %d, but received type: %d\n", expects,
+         received);
+  exit(EXIT_FAILURE);
 }

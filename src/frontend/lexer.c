@@ -91,6 +91,13 @@ vector_t *lexer_lex(lexer_t *lexer) {
         continue;
       }
 
+      if (strcmp(lexeme->buf, "str") == 0) {
+        token_t token = (token_t){.kind = TOK_KW_STR, . lexeme = "str"};
+        vector_push(tokens, &token);
+        vector_destroy(lexeme);
+        continue;
+      }
+
       token_t token = (token_t){.kind = TOK_IDENT, .lexeme = NULL};
       token.lexeme = malloc(strlen(lexeme->buf) + 1);
       strcpy(token.lexeme, lexeme->buf);
@@ -135,6 +142,32 @@ vector_t *lexer_lex(lexer_t *lexer) {
     if (curr.value == '=') {
       token_t token = (token_t){.kind = TOK_ASSIGN, .lexeme = "="};
       vector_push(tokens, &token);
+      continue;
+    }
+
+    if (curr.value == '"') {
+      size_t initial_capacity = 50;
+      vector_t *lexeme = vector_new(initial_capacity, sizeof(char));
+
+      while (lexer_peek(lexer).has_value && lexer_peek(lexer).value != '"') {
+        curr = lexer_consume(lexer);
+        vector_push(lexeme, &curr.value);
+      }
+      
+      vector_push(lexeme, &(char){'\0'});
+
+      if (!lexer_peek(lexer).has_value || lexer_peek(lexer).value != '"') {
+        printf("Unterminated string found during lexing: \"%s\" \n", (char*) lexeme->buf);
+        exit(EXIT_FAILURE);
+      }
+
+      lexer_consume(lexer); // consuming "
+
+      token_t token = (token_t){.kind = TOK_STR};
+      token.lexeme = malloc(strlen(lexeme->buf) + 1);
+      strcpy(token.lexeme, lexeme->buf);
+      vector_push(tokens, &token);
+      vector_destroy(lexeme);
       continue;
     }
 
