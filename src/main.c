@@ -10,7 +10,7 @@
 #include "common/vector.h"
 #include "common/token.h"
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv) {   
     if (argc <= 1) {
         perror("Error: Invalid bee usage ...\n Usage: bee <input.b>\n");
         return EXIT_FAILURE;
@@ -38,12 +38,9 @@ int main(int argc, char** argv) {
     checker_t *checker = checker_new(prog);
     hashmap_t *symbols = checker_check(checker);
 
-    /*
     generator_t *generator = generator_new(prog, symbols);
     generator_gen(generator);
     generator_destroy(generator); 
-
-    */ 
 
     return 0;
 }
