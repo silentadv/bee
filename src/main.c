@@ -7,17 +7,10 @@
 
 #include "backend/generator.h"
 
-#include "common/stringview.h"
 #include "common/token.h"
 #include "common/vector.h"
 
 int main(int argc, char **argv) {
-  string_view_t a = SV_LIT("teste");
-  printf(SV_FMT "\n", SV_ARG(sv_slice(a, 2)));
-  printf(SV_FMT "\n", SV_ARG(sv_range(a, 0, 2)));
-
-  return 0;
-
   if (argc <= 1) {
     perror("Error: Invalid bee usage ...\n Usage: bee <input.b>\n");
     return EXIT_FAILURE;
