@@ -19,6 +19,8 @@ typedef struct {
 string_view_t sv_create(const char *buf, size_t len);
 bool sv_equals(string_view_t a, string_view_t b);
 bool sv_starts_with(string_view_t source, string_view_t prefix);
+string_view_t sv_shift(string_view_t *source, size_t amount);
+string_view_t sv_pop(string_view_t *source, size_t amount);
 
 #endif
 
