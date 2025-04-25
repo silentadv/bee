@@ -12,6 +12,7 @@ literal        ::= integer | string
 type_anotation ::= ":" type
 var_decl_stmt  ::= "let" identifier type_anotation? "=" expr ";"
 exit_stmt      ::= "exit" expr ";"
+write_stmt     ::= "write" expr ";"
 ```
 
 ## Examples

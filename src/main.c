@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "common/stmt.h"
 #include "frontend/checker.h"
 #include "frontend/lexer.h"
 #include "frontend/parser.h"
@@ -27,7 +28,6 @@ int main(int argc, char **argv) {
            SV_ARG(tok->lexeme));
   }
 
-  /*
   parser_t *parser = parser_new(tokens);
   prog_t *prog = parser_parse(parser);
   vector_t *body = prog->body;
@@ -44,7 +44,6 @@ int main(int argc, char **argv) {
   generator_t *generator = generator_new(prog, symbols);
   generator_gen(generator);
   generator_destroy(generator);
-  */
 
   return 0;
 }

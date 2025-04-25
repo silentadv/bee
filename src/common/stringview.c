@@ -55,3 +55,11 @@ string_view_t sv_copy_with_predicate(string_view_t source,
 
   return sv_create(source.data, cursor);
 }
+
+char *sv_cstr(string_view_t source) {
+  char *parsed = malloc(source.len + 1);
+  memcpy(parsed, source.data, source.len);
+  parsed[source.len] = '\0';
+
+  return parsed;
+}

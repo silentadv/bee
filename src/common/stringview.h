@@ -1,5 +1,5 @@
-#ifndef STRING_VIEW_H
-#define STRING_VIEW_H
+#ifndef STRINGVIEW_H
+#define STRINGVIEW_H
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -29,5 +29,5 @@ string_view_t sv_pop(string_view_t *source, size_t amount);
 string_view_t sv_range(string_view_t source, size_t start, size_t end);
 string_view_t sv_copy_with_predicate(string_view_t source,
                                      string_view_predicate_t predicate);
-
+char *sv_cstr(string_view_t source);
 #endif

@@ -32,6 +32,13 @@ prog_t *parser_parse(parser_t *parser) {
       continue;
     }
 
+    if (tok->kind == TOK_KW_WRITE) {
+      write_stmt_t write_stmt = parser_parse_write_stmt(parser);
+      stmt_t stmt = {.kind = STMT_WRITE, .body = {.write_stmt = write_stmt}};
+      vector_push(prog->body, &stmt);
+      continue;
+    }
+
     if (tok->kind == TOK_KW_LET) {
       var_decl_stmt_t var_decl_stmt = parser_parse_var_decl_stmt(parser);
       stmt_t stmt = {.kind = STMT_VAR_DECL,
@@ -40,8 +47,10 @@ prog_t *parser_parse(parser_t *parser) {
       continue;
     }
 
-    printf("Invalid token found during parsing: k: %d -> '%s' \n", tok->kind,
-           tok->lexeme);
+    fprintf(stderr,
+            "parser -> Invalid token found during parsing: k: %d -> '" SV_FMT
+            "' \n",
+            tok->kind, SV_ARG(tok->lexeme));
     exit(EXIT_FAILURE);
   }
 
@@ -58,6 +67,16 @@ exit_stmt_t parser_parse_exit_stmt(parser_t *parser) {
   return exit_stmt;
 }
 
+write_stmt_t parser_parse_write_stmt(parser_t *parser) {
+  parser_expect(parser, TOK_KW_WRITE); // eating write keyword;
+
+  expr_t message_expr = parser_parse_expr(parser);
+  write_stmt_t write_stmt = {.message_expr = message_expr};
+
+  parser_expect(parser, TOK_SEMICOL);
+  return write_stmt;
+}
+
 var_decl_stmt_t parser_parse_var_decl_stmt(parser_t *parser) {
   token_t *var_kw = parser_expect(parser, TOK_KW_LET); // eating let keyword
   ident_expr_t ident_expr =
@@ -72,7 +91,7 @@ var_decl_stmt_t parser_parse_var_decl_stmt(parser_t *parser) {
     type_kw = opt_token_some(*type_tok);
   }
 
-  token_t *assign_op = parser_expect(parser, TOK_ASSIGN);
+  parser_expect(parser, TOK_ASSIGN);
   expr_t value = parser_parse_expr(parser); // parsing variable value (expr);
   parser_expect(parser, TOK_SEMICOL);       // expects end of line
 
@@ -116,8 +135,10 @@ token_t *parser_parse_lit_tok(parser_t *parser) {
   case TOK_STR:
     return tok;
   default:
-    printf("parser -> Invalid lit token received during parsing: (%d, %s)",
-           tok->kind, tok->lexeme);
+    fprintf(stderr,
+            "parser -> Invalid lit token received during parsing: (%d, " SV_FMT
+            ")",
+            tok->kind, SV_ARG(tok->lexeme));
     exit(EXIT_FAILURE);
   }
 }
@@ -129,8 +150,10 @@ token_t *parser_parse_type_tok(parser_t *parser) {
   case TOK_KW_STR:
     return tok;
   default:
-    printf("parser -> Invalid type token received during parsing: (%d, %s)",
-           tok->kind, tok->lexeme);
+    fprintf(stderr,
+            "parser -> Invalid type token received during parsing: (%d, " SV_FMT
+            ")",
+            tok->kind, SV_ARG(tok->lexeme));
     exit(EXIT_FAILURE);
   }
 }
@@ -155,7 +178,7 @@ token_t *parser_consume(parser_t *parser) {
 
 token_t *parser_expect(parser_t *parser, token_kind_t kind) {
   if (!parser_peek(parser)) {
-    printf("parser -> Expected k: %d, but received null.\n", kind);
+    fprintf(stderr, "parser -> Expected k: %d, but received null.\n", kind);
     exit(EXIT_FAILURE);
   }
 
@@ -164,10 +187,11 @@ token_t *parser_expect(parser_t *parser, token_kind_t kind) {
     return tok;
 
   if (tok->kind == TOK_EOF) {
-    printf("parser -> Expected k: %d, but received eof.\n", kind);
+    fprintf(stderr, "parser -> Expected k: %d, but received eof.\n", kind);
     exit(EXIT_FAILURE);
   }
 
-  printf("parser -> Expected k: %d, but received: %d.\n", kind, tok->kind);
+  fprintf(stderr, "parser -> Expected k: %d, but received: %d.\n", kind,
+          tok->kind);
   exit(EXIT_FAILURE);
 }

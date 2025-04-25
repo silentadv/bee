@@ -9,11 +9,16 @@
 typedef enum {
   STMT_EXIT,
   STMT_VAR_DECL,
+  STMT_WRITE,
 } stmt_kind_t;
 
 typedef struct {
   expr_t exit_code_expr;
 } exit_stmt_t;
+
+typedef struct {
+  expr_t message_expr;
+} write_stmt_t;
 
 typedef struct {
   ident_expr_t identifier;
@@ -27,6 +32,7 @@ typedef struct {
   union {
     exit_stmt_t exit_stmt;
     var_decl_stmt_t var_decl_stmt;
+    write_stmt_t write_stmt;
   } body;
 } stmt_t;
 

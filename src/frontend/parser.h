@@ -1,12 +1,14 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include <stddef.h>
-#include <stdbool.h>
+#include "../common/expr.h"
+#include "../common/stmt.h"
+#include "../common/stringview.h"
 #include "../common/token.h"
 #include "../common/vector.h"
-#include "../common/stmt.h"
-#include "../common/expr.h"
+#include <stdbool.h>
+#include <stddef.h>
+
 #include "../frontend/lexer.h"
 
 typedef struct {
@@ -24,6 +26,7 @@ void parser_destroy(parser_t *parser);
 prog_t *parser_parse(parser_t *parser);
 exit_stmt_t parser_parse_exit_stmt(parser_t *parser);
 var_decl_stmt_t parser_parse_var_decl_stmt(parser_t *parser);
+write_stmt_t parser_parse_write_stmt(parser_t *parser);
 
 expr_t parser_parse_expr(parser_t *parser);
 lit_expr_t parser_parse_lit_expr(parser_t *parser);

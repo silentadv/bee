@@ -7,10 +7,11 @@ typedef enum {
   TOK_EOF = 0, // end of file
 
   // Keywords
-  TOK_KW_EXIT, // exit keyword
-  TOK_KW_INT,  // int type keyword
-  TOK_KW_STR,  // str type keyword
-  TOK_KW_LET,  // let keyword
+  TOK_KW_EXIT,  // exit keyword
+  TOK_KW_WRITE, // write keyword
+  TOK_KW_INT,   // int type keyword
+  TOK_KW_STR,   // str type keyword
+  TOK_KW_LET,   // let keyword
 
   // Literals
   TOK_IDENT, // identifier

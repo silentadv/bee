@@ -7,7 +7,6 @@
 #include "../common/vector.h"
 #include "lexer.h"
 
-static bool __istext_predicate(const char c) { return c == ' '; }
 static bool __isalnum_predicate(const char c) { return (bool)isalnum(c); }
 static bool __isdigit_predicate(const char c) { return (bool)isdigit(c); }
 static bool __isstr_predicate(const char c) { return c != '"'; }
@@ -93,6 +92,8 @@ token_t lexer_tokenize(lexer_t *lexer) {
       return (token_t){.kind = TOK_KW_STR, .lexeme = text};
     if (sv_equals(text, SV("let")))
       return (token_t){.kind = TOK_KW_LET, .lexeme = text};
+    if (sv_equals(text, SV("write")))
+      return (token_t){.kind = TOK_KW_WRITE, .lexeme = text};
 
     return (token_t){.kind = TOK_IDENT, .lexeme = text};
   }

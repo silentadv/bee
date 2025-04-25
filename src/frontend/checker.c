@@ -3,9 +3,7 @@
 #include <stdlib.h>
 
 static const type_t type_anottations[] = {
-    [TOK_KW_STR] = TYPE_STR,
-    [TOK_KW_INT] = TYPE_INT
-};
+    [TOK_KW_STR] = TYPE_STR, [TOK_KW_INT] = TYPE_INT};
 
 checker_t *checker_new(prog_t *program) {
   checker_t *checker = malloc(sizeof(checker_t));
@@ -31,16 +29,17 @@ void checker_check_stmt(checker_t *checker) {
   case STMT_VAR_DECL: {
     var_decl_stmt_t var_decl_stmt = stmt->body.var_decl_stmt;
     type_t received_type = checker_check_expr(checker, &var_decl_stmt.value);
-    
+
     if (var_decl_stmt.type_kw.has_value)
-        checker_expect(type_anottations[var_decl_stmt.type_kw.value.kind], received_type);  
+      checker_expect(type_anottations[var_decl_stmt.type_kw.value.kind],
+                     received_type);
 
     symbol_t symbol = {.ident_expr = var_decl_stmt.identifier,
                        .value = var_decl_stmt.value,
                        .type = received_type};
 
-    hashmap_insert(checker->symbols, var_decl_stmt.identifier.identifier.lexeme,
-                   &symbol, sizeof(symbol));
+    string_view_t lexeme = var_decl_stmt.identifier.identifier.lexeme;
+    hashmap_insert(checker->symbols, lexeme, &symbol, sizeof(symbol));
     break;
   }
   case STMT_EXIT: {
@@ -49,10 +48,17 @@ void checker_check_stmt(checker_t *checker) {
     checker_expect(TYPE_INT, code_type);
     break;
   }
+  case STMT_WRITE: {
+    write_stmt_t write_stmt = stmt->body.write_stmt;
+    type_t message_type = checker_check_expr(checker, &write_stmt.message_expr);
+    checker_expect(TYPE_STR, message_type);
+    break;
+  }
   default:
-    printf("checker -> Invalid statement found during semantic checking -> k: "
-           "%d \n",
-           stmt->kind);
+    fprintf(stderr,
+            "checker -> Invalid statement found during semantic checking -> k: "
+            "%d \n",
+            stmt->kind);
     exit(EXIT_FAILURE);
   }
 }
@@ -64,19 +70,20 @@ type_t checker_check_expr(checker_t *checker, expr_t *expr) {
   case EXPR_LIT:
     return checker_check_lit_expr(checker, expr);
   default:
-    printf("checker -> Invalid expression found during checking -> k: %d \n",
-           expr->kind);
+    fprintf(stderr,
+            "checker -> Invalid expression found during checking -> k: %d \n",
+            expr->kind);
     exit(EXIT_FAILURE);
   }
 }
 
 type_t checker_check_ident_expr(checker_t *checker, expr_t *expr) {
   ident_expr_t ident_expr = expr->body.ident_expr;
-  hashmap_bucket_t *bucket =
-      hashmap_get(checker->symbols, ident_expr.identifier.lexeme);
+  string_view_t lexeme = ident_expr.identifier.lexeme;
+  hashmap_bucket_t *bucket = hashmap_get(checker->symbols, lexeme);
 
   if (bucket == NULL) {
-    printf("checker - %s is not defined \n", ident_expr.identifier.lexeme);
+    fprintf(stderr, "checker -> " SV_FMT " is not defined \n", SV_ARG(lexeme));
     exit(EXIT_FAILURE);
   }
 
@@ -92,8 +99,9 @@ type_t checker_check_lit_expr(checker_t *checker, expr_t *expr) {
   case TOK_STR:
     return TYPE_STR;
   default:
-    printf("checker -> Invalid literal found during checking -> k: %d \n",
-           lit_expr.literal.kind);
+    fprintf(stderr,
+            "checker -> Invalid literal found during checking -> k: %d \n",
+            lit_expr.literal.kind);
     exit(EXIT_FAILURE);
   }
 }
@@ -120,11 +128,11 @@ stmt_t *checker_consume(checker_t *checker) {
   return stmt;
 }
 
-void checker_expect(type_t expects, type_t received){
+void checker_expect(type_t expects, type_t received) {
   if (expects == received)
     return;
 
-  printf("checker -> Expects type %d, but received type: %d\n", expects,
-         received);
+  fprintf(stderr, "checker -> Expects type %d, but received type: %d\n",
+          expects, received);
   exit(EXIT_FAILURE);
 }

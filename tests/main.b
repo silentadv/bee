@@ -1,4 +1,4 @@
-let a: str = 10;
-let b = "teste";
-let c: int = a;
-exit 10;
+let code: int = 10;
+let message: str = "Hello, World";
+
+exit code;
