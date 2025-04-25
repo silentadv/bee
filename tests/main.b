@@ -1,3 +1,4 @@
-let x: str = "1";
-let y = x;
+let a: str = 10;
+let b = "teste";
+let c: int = a;
 exit 10;

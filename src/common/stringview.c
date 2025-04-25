@@ -46,3 +46,12 @@ string_view_t sv_range(string_view_t source, size_t start, size_t end) {
 
   return sv_create(source.data + start, end - start);
 }
+
+string_view_t sv_copy_with_predicate(string_view_t source,
+                                     string_view_predicate_t predicate) {
+  size_t cursor = 0;
+  while (cursor < source.len && predicate(source.data[cursor]))
+    cursor++;
+
+  return sv_create(source.data, cursor);
+}

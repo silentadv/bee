@@ -7,6 +7,7 @@
 
 #include "backend/generator.h"
 
+#include "common/stringview.h"
 #include "common/token.h"
 #include "common/vector.h"
 
@@ -22,9 +23,11 @@ int main(int argc, char **argv) {
 
   for (size_t i = 0; i < tokens->buf_size; i++) {
     token_t *tok = (token_t *)vector_at(tokens, i);
-    printf("token -> k: %d, lexeme: %s\n", tok->kind, tok->lexeme);
+    printf("token -> k: %d, lexeme: " SV_FMT "\n", tok->kind,
+           SV_ARG(tok->lexeme));
   }
 
+  /*
   parser_t *parser = parser_new(tokens);
   prog_t *prog = parser_parse(parser);
   vector_t *body = prog->body;
@@ -41,6 +44,7 @@ int main(int argc, char **argv) {
   generator_t *generator = generator_new(prog, symbols);
   generator_gen(generator);
   generator_destroy(generator);
+  */
 
   return 0;
 }
