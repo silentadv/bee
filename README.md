@@ -7,7 +7,9 @@ Bee is a compiled language.
 ```ebnf
 prog           ::= stmt*
 stmt           ::= expr_stmt | var_decl_stmt
-expr           ::= literal | identifier
+expr           ::= literal | identifier | call
+call           ::= identifier "!" "(" arguments? ")" ";"
+arguments      ::= expr ( "," expr)*
 literal        ::= integer | string
 type_anotation ::= ":" type
 expr_stmt      ::= expr ";"
@@ -21,6 +23,7 @@ let number: int = 10;
 let exitCode = number;
 let str = "Hello, World!";
 let message: str = str;
+let messageLen = strlen!(message);
 
 print!(message);
 exit!(exitCode);
