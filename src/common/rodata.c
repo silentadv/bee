@@ -34,9 +34,8 @@ void rodata_emit(rodata_t *rod, FILE *output) {
 
     while (bucket != NULL) {
       rodata_value_t *value = (rodata_value_t *)bucket->buf;
-      fprintf(output, " .LC%zu: db \"" SV_FMT "\"\n", value->id,
+      fprintf(output, " .LC%zu: db \"" SV_FMT "\", 0\n", value->id,
               SV_ARG(value->str));
-      fprintf(output, " .LC%zu_len equ $ - .LC%zu\n", value->id, value->id);
       bucket = bucket->next;
     }
   }

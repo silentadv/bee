@@ -7,33 +7,31 @@
 #include <stddef.h>
 
 typedef enum {
-  STMT_EXIT,
   STMT_VAR_DECL,
-  STMT_WRITE,
+  STMT_EXPR,
 } stmt_kind_t;
 
-typedef struct {
-  expr_t exit_code_expr;
-} exit_stmt_t;
+typedef struct stmt_t stmt_t;
+typedef struct var_decl_stmt_t var_decl_stmt_t;
+typedef struct expr_stmt_t expr_stmt_t;
 
-typedef struct {
-  expr_t message_expr;
-} write_stmt_t;
-
-typedef struct {
+struct var_decl_stmt_t {
   ident_expr_t identifier;
   expr_t value;
   token_t var_kw;
   opt_token_t type_kw;
-} var_decl_stmt_t;
+};
 
-typedef struct {
+struct expr_stmt_t {
+  expr_t expr;
+};
+
+struct stmt_t {
   stmt_kind_t kind;
   union {
-    exit_stmt_t exit_stmt;
     var_decl_stmt_t var_decl_stmt;
-    write_stmt_t write_stmt;
+    expr_stmt_t expr_stmt;
   } body;
-} stmt_t;
+};
 
 #endif

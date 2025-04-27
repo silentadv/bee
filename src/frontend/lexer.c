@@ -84,16 +84,12 @@ token_t lexer_tokenize(lexer_t *lexer) {
   if (text.len > 0) { // tokenizing identifiers and keywords
     lexer->cursor += text.len;
 
-    if (sv_equals(text, SV("exit")))
-      return (token_t){.kind = TOK_KW_EXIT, .lexeme = text};
     if (sv_equals(text, SV("int")))
       return (token_t){.kind = TOK_KW_INT, .lexeme = text};
     if (sv_equals(text, SV("str")))
       return (token_t){.kind = TOK_KW_STR, .lexeme = text};
     if (sv_equals(text, SV("let")))
       return (token_t){.kind = TOK_KW_LET, .lexeme = text};
-    if (sv_equals(text, SV("write")))
-      return (token_t){.kind = TOK_KW_WRITE, .lexeme = text};
 
     return (token_t){.kind = TOK_IDENT, .lexeme = text};
   }
@@ -121,6 +117,14 @@ token_t lexer_tokenize(lexer_t *lexer) {
     return (token_t){.kind = TOK_SEMICOL, .lexeme = SV(";")};
   if (sv_starts_with(block, SV("=")))
     return (token_t){.kind = TOK_ASSIGN, .lexeme = SV("=")};
+  if (sv_starts_with(block, SV("!")))
+    return (token_t){.kind = TOK_BANG, .lexeme = SV("!")};
+  if (sv_starts_with(block, SV(",")))
+    return (token_t){.kind = TOK_COMMA, .lexeme = SV(",")};
+  if (sv_starts_with(block, SV("(")))
+    return (token_t){.kind = TOK_LPAREN, .lexeme = SV("(")};
+  if (sv_starts_with(block, SV(")")))
+    return (token_t){.kind = TOK_RPAREN, .lexeme = SV(")")};
 
   fprintf(stderr, "lexer -> unexpected token found " SV_FMT "\n",
           SV_ARG(sv_rslice(block, 1)));

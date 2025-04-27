@@ -5,10 +5,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-generator_t *generator_new(prog_t *prog, hashmap_t *symbols) {
+generator_t *generator_new(prog_t *prog, hashmap_t *symbols,
+                           hashmap_t *runtime_env) {
   generator_t *instance = malloc(sizeof(generator_t));
   instance->prog = prog;
   instance->symbols = symbols;
+  instance->runtime_env = runtime_env;
   instance->rodata = rodata_new(64);
   instance->cursor = 0;
   instance->stack_size = 0;
@@ -49,14 +51,11 @@ void generator_gen_stmt(generator_t *generator) {
   stmt_t *stmt = generator_peek(generator);
 
   switch (stmt->kind) {
-  case STMT_EXIT:
-    generator_gen_exit_stmt(generator);
-    break;
   case STMT_VAR_DECL:
     generator_gen_var_decl_stmt(generator);
     break;
-  case STMT_WRITE:
-    generator_gen_write_stmt(generator);
+  case STMT_EXPR:
+    generator_gen_expr_stmt(generator);
     break;
   default:
     printf("generator -> Unexpected statement found during generation, "
@@ -66,43 +65,27 @@ void generator_gen_stmt(generator_t *generator) {
   }
 }
 
-void generator_gen_exit_stmt(generator_t *generator) {
-  stmt_t *stmt = generator_expect(generator, STMT_EXIT);
-  exit_stmt_t exit_stmt = stmt->body.exit_stmt;
-
-  generator_gen_expr(generator, &exit_stmt.exit_code_expr);
-
-  FILE *output = generator->output;
-  fprintf(output, "   mov rdi, rax\n");
-  fprintf(output, "   mov rax, 60\n");
-  fprintf(output, "   syscall\n");
-}
-
-void generator_gen_write_stmt(generator_t *generator) {
-  stmt_t *stmt = generator_expect(generator, STMT_WRITE);
-  write_stmt_t write_stmt = stmt->body.write_stmt;
-  generator_gen_expr(generator, &write_stmt.message_expr);
-
-  FILE *output = generator->output;
-  fprintf(output, "   mov rsi, rax\n");
-  fprintf(output, "   mov rax, 1\n");
-  fprintf(output, "   mov rdi, 1\n");
-  fprintf(output, "   syscall\n");
-}
-
 void generator_gen_var_decl_stmt(generator_t *generator) {
   stmt_t *stmt = generator_expect(generator, STMT_VAR_DECL);
   var_decl_stmt_t var_decl_stmt = stmt->body.var_decl_stmt;
 
   generator_gen_expr(generator, &var_decl_stmt.value);
 
-  string_view_t ident = var_decl_stmt.identifier.identifier.lexeme;
+  string_view_t ident = var_decl_stmt.identifier.token.lexeme;
   hashmap_bucket_t *bucket = hashmap_get(generator->symbols, ident);
   symbol_t *symbol = (symbol_t *)bucket->buf;
   symbol->stack_pos = generator->stack_size++;
 
   FILE *output = generator->output;
   fprintf(output, "   push rax\n");
+}
+
+void generator_gen_expr_stmt(generator_t *generator) {
+  stmt_t *stmt = generator_expect(generator, STMT_EXPR);
+  expr_stmt_t expr_stmt = stmt->body.expr_stmt;
+
+  if (expr_stmt.expr.kind == EXPR_CALL)
+    generator_gen_expr(generator, &expr_stmt.expr);
 }
 
 void generator_gen_expr(generator_t *generator, expr_t *expr) {
@@ -112,6 +95,9 @@ void generator_gen_expr(generator_t *generator, expr_t *expr) {
     break;
   case EXPR_IDENT:
     generator_gen_ident_expr(generator, &expr->body.ident_expr);
+    break;
+  case EXPR_CALL:
+    generator_gen_call_expr(generator, &expr->body.call_expr);
     break;
   default:
     printf("generator -> Unexpected expression found during generation, "
@@ -123,27 +109,26 @@ void generator_gen_expr(generator_t *generator, expr_t *expr) {
 
 void generator_gen_lit_expr(generator_t *generator, lit_expr_t *expr) {
   FILE *output = generator->output;
-  switch (expr->literal.kind) {
+  switch (expr->token.kind) {
   case TOK_NUM:
-    fprintf(output, "   mov rax, " SV_FMT "\n", SV_ARG(expr->literal.lexeme));
+    fprintf(output, "   mov rax, " SV_FMT "\n", SV_ARG(expr->token.lexeme));
     break;
   case TOK_STR: {
-    rodata_set(generator->rodata, expr->literal.lexeme);
+    rodata_set(generator->rodata, expr->token.lexeme);
     size_t id = generator->rodata->len - 1;
     fprintf(output, "   lea rax, [rel .LC%zu]\n", id);
-    fprintf(output, "   mov rdx, .LC%zu_len\n", id);
     break;
   }
   default:
     fprintf(stderr,
             "generator -> unexpected tok lit found during generation: %d.",
-            expr->literal.kind);
+            expr->token.kind);
     exit(EXIT_FAILURE);
   }
 }
 
 void generator_gen_ident_expr(generator_t *generator, ident_expr_t *expr) {
-  string_view_t ident = expr->identifier.lexeme;
+  string_view_t ident = expr->token.lexeme;
   hashmap_bucket_t *bucket = hashmap_get(generator->symbols, ident);
 
   if (bucket == NULL) {
@@ -157,6 +142,26 @@ void generator_gen_ident_expr(generator_t *generator, ident_expr_t *expr) {
   FILE *output = generator->output;
   fprintf(output, "   mov rax, [rsp + %lu]\n",
           (generator->stack_size - symbol->stack_pos - 1) * 8);
+}
+
+void generator_gen_call_expr(generator_t *generator, call_expr_t *expr) {
+  string_view_t ident = expr->identifier.token.lexeme;
+  hashmap_bucket_t *bucket = hashmap_get(generator->runtime_env, ident);
+
+  runtime_fun_t *fun = (runtime_fun_t *)bucket->buf;
+  vector_t *args = expr->args;
+  FILE *output = generator->output;
+
+  for (size_t i = 0; i < fun->input_count; i++) {
+    expr_t *current_arg = vector_at(args, i);
+    generator_gen_expr(generator, current_arg);
+
+    runtime_reg_t current_param = fun->inputs[i];
+    fprintf(output, "   mov " SV_FMT ", rax\n", SV_ARG(current_param.name));
+  }
+
+  fprintf(output, "    extern bee_" SV_FMT "\n", SV_ARG(fun->name));
+  fprintf(output, "    call bee_" SV_FMT "\n", SV_ARG(fun->name));
 }
 
 stmt_t *generator_peek(generator_t *generator) {

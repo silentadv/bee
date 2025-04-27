@@ -7,11 +7,9 @@ typedef enum {
   TOK_EOF = 0, // end of file
 
   // Keywords
-  TOK_KW_EXIT,  // exit keyword
-  TOK_KW_WRITE, // write keyword
-  TOK_KW_INT,   // int type keyword
-  TOK_KW_STR,   // str type keyword
-  TOK_KW_LET,   // let keyword
+  TOK_KW_INT, // int type keyword
+  TOK_KW_STR, // str type keyword
+  TOK_KW_LET, // let keyword
 
   // Literals
   TOK_IDENT, // identifier
@@ -19,9 +17,13 @@ typedef enum {
   TOK_STR,   // string
 
   // Punctuactors
+  TOK_COMMA,   // ,
   TOK_SEMICOL, // ;
   TOK_COLON,   // :
   TOK_ASSIGN,  // =
+  TOK_LPAREN,  // (
+  TOK_RPAREN,  // )
+  TOK_BANG,    // !
 } token_kind_t;
 
 typedef struct {

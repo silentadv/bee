@@ -25,20 +25,6 @@ prog_t *parser_parse(parser_t *parser) {
   while (parser_peek(parser) != NULL && parser_peek(parser)->kind != TOK_EOF) {
     token_t *tok = parser_peek(parser);
 
-    if (tok->kind == TOK_KW_EXIT) {
-      exit_stmt_t exit_stmt = parser_parse_exit_stmt(parser);
-      stmt_t stmt = {.kind = STMT_EXIT, .body = {.exit_stmt = exit_stmt}};
-      vector_push(prog->body, &stmt);
-      continue;
-    }
-
-    if (tok->kind == TOK_KW_WRITE) {
-      write_stmt_t write_stmt = parser_parse_write_stmt(parser);
-      stmt_t stmt = {.kind = STMT_WRITE, .body = {.write_stmt = write_stmt}};
-      vector_push(prog->body, &stmt);
-      continue;
-    }
-
     if (tok->kind == TOK_KW_LET) {
       var_decl_stmt_t var_decl_stmt = parser_parse_var_decl_stmt(parser);
       stmt_t stmt = {.kind = STMT_VAR_DECL,
@@ -47,34 +33,12 @@ prog_t *parser_parse(parser_t *parser) {
       continue;
     }
 
-    fprintf(stderr,
-            "parser -> Invalid token found during parsing: k: %d -> '" SV_FMT
-            "' \n",
-            tok->kind, SV_ARG(tok->lexeme));
-    exit(EXIT_FAILURE);
+    expr_stmt_t expr_stmt = parser_parse_expr_stmt(parser);
+    stmt_t stmt = {.kind = STMT_EXPR, .body = {.expr_stmt = expr_stmt}};
+    vector_push(prog->body, &stmt);
   }
 
   return prog;
-}
-
-exit_stmt_t parser_parse_exit_stmt(parser_t *parser) {
-  parser_expect(parser, TOK_KW_EXIT); // eating exit keyword;
-
-  expr_t exit_code_expr = parser_parse_expr(parser);
-  exit_stmt_t exit_stmt = {.exit_code_expr = exit_code_expr};
-
-  parser_expect(parser, TOK_SEMICOL);
-  return exit_stmt;
-}
-
-write_stmt_t parser_parse_write_stmt(parser_t *parser) {
-  parser_expect(parser, TOK_KW_WRITE); // eating write keyword;
-
-  expr_t message_expr = parser_parse_expr(parser);
-  write_stmt_t write_stmt = {.message_expr = message_expr};
-
-  parser_expect(parser, TOK_SEMICOL);
-  return write_stmt;
 }
 
 var_decl_stmt_t parser_parse_var_decl_stmt(parser_t *parser) {
@@ -103,11 +67,24 @@ var_decl_stmt_t parser_parse_var_decl_stmt(parser_t *parser) {
   return var_decl_stmt;
 }
 
+expr_stmt_t parser_parse_expr_stmt(parser_t *parser) {
+  expr_t expr = parser_parse_expr(parser);
+  parser_expect(parser, TOK_SEMICOL);
+
+  expr_stmt_t expr_stmt = {.expr = expr};
+  return expr_stmt;
+}
+
 expr_t parser_parse_expr(parser_t *parser) {
   token_t *curr = parser_peek(parser);
   if (curr->kind == TOK_IDENT) {
     ident_expr_t ident_expr = parser_parse_ident_expr(parser);
     expr_t expr = {.kind = EXPR_IDENT, .body = {.ident_expr = ident_expr}};
+    if (parser_peek(parser)->kind != TOK_BANG)
+      return expr;
+
+    call_expr_t call_expr = parser_parse_call_expr(parser, ident_expr);
+    expr = (expr_t){.kind = EXPR_CALL, .body = {.call_expr = call_expr}};
     return expr;
   }
 
@@ -118,14 +95,35 @@ expr_t parser_parse_expr(parser_t *parser) {
 
 lit_expr_t parser_parse_lit_expr(parser_t *parser) {
   token_t *lit = parser_parse_lit_tok(parser);
-  lit_expr_t lit_expr = {.literal = *lit};
+  lit_expr_t lit_expr = {.token = *lit};
   return lit_expr;
 }
 
 ident_expr_t parser_parse_ident_expr(parser_t *parser) {
   token_t *ident = parser_expect(parser, TOK_IDENT);
-  ident_expr_t ident_expr = {.identifier = *ident};
+  ident_expr_t ident_expr = {.token = *ident};
   return ident_expr;
+}
+
+call_expr_t parser_parse_call_expr(parser_t *parser, ident_expr_t identifier) {
+  parser_expect(parser, TOK_BANG);
+  parser_expect(parser, TOK_LPAREN);
+
+  vector_t *args = vector_new(25, sizeof(expr_t));
+
+  do {
+    if (parser_peek(parser)->kind == TOK_COMMA)
+      parser_consume(parser);
+
+    expr_t arg = parser_parse_expr(parser);
+    vector_push(args, &arg);
+  } while (parser_peek(parser)->kind == TOK_COMMA);
+
+  parser_expect(parser, TOK_RPAREN);
+
+  call_expr_t call_expr = {
+      .identifier = identifier, .builtin = true, .args = args};
+  return call_expr;
 }
 
 token_t *parser_parse_lit_tok(parser_t *parser) {

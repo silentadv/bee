@@ -1,4 +1,5 @@
-let code: int = 10;
 let message: str = "Hello, World";
+let messageLen = strlen!(message);
 
-exit code;
+print!(message);
+exit!(messageLen);
